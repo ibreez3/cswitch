@@ -1,0 +1,65 @@
+{
+  "version": 2,
+  "tools": {
+    "claude": {
+      "current": "glm",
+      "current_model": "glm-5",
+      "models": {
+        "aliyun": {
+          "base_url": "https://coding.dashscope.aliyuncs.com/apps/anthropic",
+          "api_key": "sk-sp-9fed5ebe65814d07a434a21fdc752024",
+          "models": [
+            "qwen3.5-plus",
+            "qwen3-max-2026-01-23",
+            "qwen3-coder-next",
+            "qwen3-coder-plus",
+            "glm-5",
+            "kimi-k2.5",
+            "MiniMax-M2.5"
+          ],
+          "opus_model": "qwen3.5-plus",
+          "haiku_model": "kimi-k2.5",
+          "sonnet_model": "MiniMax-M2.5"
+        },
+        "glm": {
+          "base_url": "https://open.bigmodel.cn/api/anthropic",
+          "api_key": "3931bc72555c4503b4a0b6cc57064c39.gxdkqlCTdoe6sdHl",
+          "models": [
+            "glm-5"
+          ],
+          "opus_model": "glm-5",
+          "haiku_model": "glm-4.6",
+          "sonnet_model": "glm-4.7"
+        }
+      }
+    },
+    "codex": {
+      "current": "aliyun",
+      "current_model": "qwen3-coder-plus",
+      "models": {
+        "aliyun": {
+          "base_url": "https://coding.dashscope.aliyuncs.com/v1",
+          "api_key": "sk-sp-9fed5ebe65814d07a434a21fdc752024",
+          "models": [
+            "qwen3.5-plus",
+            "qwen3-max-2026-01-23",
+            "qwen3-coder-next",
+            "qwen3-coder-plus",
+            "glm-5",
+            "kimi-k2.5",
+            "MiniMax-M2.5"
+          ],
+          "timeout": 30000000
+        },
+        "glm": {
+          "base_url": "https://open.bigmodel.cn/api/coding/paas/v4",
+          "api_key": "d495b23e2cb64ad98e49e3385dbd6a03.Pscbij2swoRmHbhG",
+          "models": [
+            "glm-5"
+          ],
+          "provider_name": "Z.AI"
+        }
+      }
+    }
+  }
+}

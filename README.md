@@ -104,7 +104,10 @@ cswitch codex current
 
 ```bash
 cswitch claude add [别名]              # 添加模型配置（交互式/非交互式）
-cswitch claude switch <别名> [模型]    # 切换到指定配置，写入 ~/.claude/settings.json
+                                      #   --opus-model: Opus 模型名称（默认使用 models 第一个）
+                                      #   --haiku-model: Haiku 模型名称（默认使用 models 第一个）
+                                      #   --sonnet-model: Sonnet 模型名称（默认使用 models 第一个）
+cswitch claude switch <别名>          # 切换到指定配置，写入 ~/.claude/settings.json
 cswitch claude list                   # 列出所有配置
 cswitch claude current                # 查看当前配置
 cswitch claude delete <别名>          # 删除配置
@@ -139,14 +142,15 @@ cswitch claude add
 # ? 请输入 API Key（必填，输入时隐藏显示）：sk-xxxx
 # ? 请输入模型列表（必填，格式如 ["claude-sonnet-4"]）：["qwen-coder-plus", "qwen-max"]
 # ? 是否需要配置可选参数（y/n，默认 n）：n
+# ? 是否配置模型类型映射（opus/haiku/sonnet）（y/n，默认 n）：y
+# ? Opus 模型名称（默认 qwen-coder-plus）：qwen-max
+# ? Haiku 模型名称（默认 qwen-coder-plus）：qwen-coder-plus
+# ? Sonnet 模型名称（默认 qwen-coder-plus）：qwen-coder-plus
 # 模型 dashscope 添加成功！
 
-# 切换到该配置（默认使用第一个模型）
+# 切换到该配置
 cswitch claude switch dashscope
-# 已切换 Claude 配置（模型: qwen-coder-plus），写入 ~/.claude/settings.json
-
-# 或指定使用 qwen-max
-cswitch claude switch dashscope qwen-max
+# 已切换 Claude 配置到 dashscope，写入 ~/.claude/settings.json
 ```
 
 ### 场景 2：配置智谱 AI GLM（Codex 协议）
@@ -215,7 +219,9 @@ cswitch claude delete openai
 cswitch claude switch dashscope --env
 # export ANTHROPIC_BASE_URL='https://coding.dashscope.aliyuncs.com/apps/anthropic'
 # export ANTHROPIC_API_KEY='sk-****'
-# export ANTHROPIC_MODEL='qwen-coder-plus'
+# export ANTHROPIC_DEFAULT_OPUS_MODEL='qwen-coder-plus'
+# export ANTHROPIC_DEFAULT_HAIKU_MODEL='qwen-coder-plus'
+# export ANTHROPIC_DEFAULT_SONNET_MODEL='qwen-coder-plus'
 
 # 配合 eval 使用
 eval "$(cswitch claude switch dashscope --env)"
@@ -240,6 +246,9 @@ claude
           "base_url": "https://coding.dashscope.aliyuncs.com/apps/anthropic",
           "api_key": "sk-xxxx",
           "models": ["qwen-coder-plus", "qwen-max"],
+          "opus_model": "qwen-max",
+          "haiku_model": "qwen-coder-plus",
+          "sonnet_model": "qwen-coder-plus",
           "timeout": 0,
           "max_tokens": 0
         }
@@ -273,7 +282,9 @@ claude
   "env": {
     "ANTHROPIC_BASE_URL": "https://coding.dashscope.aliyuncs.com/apps/anthropic",
     "ANTHROPIC_API_KEY": "sk-xxxx",
-    "ANTHROPIC_MODEL": "qwen-coder-plus"
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "qwen-coder-plus",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "qwen-coder-plus",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "qwen-coder-plus"
   },
   "permissions": {
     "allow_file_access": true
@@ -347,7 +358,7 @@ cswitch 适合：追求极简、命令行优先、不需要复杂管理功能的
 
 ### 工具版本支持
 
-- Claude Code：支持 `ANTHROPIC_BASE_URL`、`ANTHROPIC_API_KEY`、`ANTHROPIC_MODEL` 的所有版本
+- Claude Code：支持 `ANTHROPIC_BASE_URL`、`ANTHROPIC_API_KEY`、`ANTHROPIC_DEFAULT_OPUS_MODEL`、`ANTHROPIC_DEFAULT_HAIKU_MODEL`、`ANTHROPIC_DEFAULT_SONNET_MODEL` 的所有版本
 - Codex：支持使用 `model_provider` + `[model_providers]` 配置方式的版本
 
 ## 常见问题
