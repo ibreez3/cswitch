@@ -23,6 +23,8 @@ type ModelConfig struct {
 	OpusModel   string `json:"opus_model,omitempty"`
 	HaikuModel  string `json:"haiku_model,omitempty"`
 	SonnetModel string `json:"sonnet_model,omitempty"`
+	// OpenCode 专用
+	SmallModel string `json:"small_model,omitempty"`
 }
 
 // ToolConfig 工具配置

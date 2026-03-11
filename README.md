@@ -4,21 +4,17 @@
 [![Go Version](https://img.shields.io/badge/go-%3E%3D%201.21-blue)](https://golang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-一款超轻量化的 Claude Code / Codex 模型切换 CLI 工具。
+一款超轻量化的 Claude Code / OpenCode 模型切换 CLI 工具。（Codex 支持暂不可用）
 
 参考 [cc-switch](https://github.com/farion1231/cc-switch) 的设计思路，专注于**配置管理与快速切换**，无多余功能，单文件编译即可运行。
 
 ## 特性
 
-- **双协议支持**：同时管理 Claude Code (Anthropic 协议) 和 Codex (OpenAI 协议)
+- **多工具支持**：同时管理 Claude Code (Anthropic 协议) 和 OpenCode
+
+> ⚠️ **注意**：Codex 支持目前不可用。Codex CLI 本地接口已变更，但主流模型厂商尚未适配最新改动，因此暂不推荐使用 Codex 子命令。
 - **原生配置写入**：直接修改各工具的配置文件，即时生效
 - **交互式添加**：向导式输入，降低配置复杂度
-- **模型智能选择**：支持多模型别名，自动默认或指定切换
-- **自动备份回滚**：每次切换前自动备份，支持一键回滚
-- **环境变量持久化**：Codex API Key 自动注入 Shell 配置
-- **API 端点可配置**：支持 Chat Completions (`chat`) 和 Responses API (`responses`)
-- **原子写入**：关键文件采用临时文件 + rename，防止配置损坏
-- **权限安全**：敏感配置文件默认 `0600` 权限
 
 ## 安装
 
@@ -74,19 +70,20 @@ cswitch init
 # 2. 添加 Claude Code 配置（交互式）
 cswitch claude add
 
-# 3. 添加 Codex 配置（非交互式，适合脚本）
-cswitch codex add myprovider \
+# 3. 添加 OpenCode 配置（非交互式）
+cswitch opencode add myprovider \
   --base-url "https://api.example.com/v1" \
   --api-key "sk-xxxx" \
-  --models '["gpt-4o", "gpt-4o-mini"]'
+  --models '["gpt-4o", "gpt-4o-mini"]' \
+  --provider-name "custom"
 
 # 4. 切换到指定配置
 cswitch claude switch myprovider
-cswitch codex switch myprovider gpt-4o
+cswitch opencode switch myprovider
 
 # 5. 查看当前配置
 cswitch claude current
-cswitch codex current
+cswitch opencode current
 ```
 
 ## 命令详解
@@ -98,7 +95,8 @@ cswitch codex current
 | `cswitch init` | 初始化 `~/.cswitch/` 配置目录 |
 | `cswitch version` | 显示版本信息 |
 | `cswitch claude` | Claude Code 配置管理子命令 |
-| `cswitch codex` | Codex 配置管理子命令 |
+| `cswitch codex` | Codex 配置管理子命令（⚠️ 暂不可用） |
+| `cswitch opencode` | OpenCode 配置管理子命令 |
 
 ### Claude Code 子命令
 
@@ -116,6 +114,8 @@ cswitch claude rollback               # 从备份恢复配置
 
 ### Codex 子命令
 
+> ⚠️ **暂不可用**：Codex CLI 接口已变更，模型厂商尚未适配，请使用 Claude 或 OpenCode 代替。
+
 ```bash
 cswitch codex add [别名]               # 添加模型配置
                                       #   --provider-name: 自定义 provider 名称
@@ -128,6 +128,22 @@ cswitch codex list                    # 列出所有配置
 cswitch codex current                 # 查看当前配置
 cswitch codex delete <别名>           # 删除配置
 cswitch codex rollback                # 从备份恢复配置
+```
+
+### OpenCode 子命令
+
+```bash
+cswitch opencode add [别名]            # 添加模型配置
+                                      #   --provider-name: Provider 名称（用于模型前缀）
+                                      #   --small-model: small_model 名称（轻量级任务用）
+cswitch opencode switch <别名>        # 切换到指定配置
+                                      #   写入 ~/.config/opencode/opencode.json
+                                      #   写入 ~/.cswitch/opencode.env
+                                      #   自动注入 ~/.zshrc 或 ~/.bashrc
+cswitch opencode list                 # 列出所有配置
+cswitch opencode current              # 查看当前配置
+cswitch opencode delete <别名>        # 删除配置
+cswitch opencode rollback             # 从备份恢复配置
 ```
 
 ## 使用示例
@@ -153,27 +169,29 @@ cswitch claude switch dashscope
 # 已切换 Claude 配置到 dashscope，写入 ~/.claude/settings.json
 ```
 
-### 场景 2：配置智谱 AI GLM（Codex 协议）
+### 场景 2：配置自定义模型（OpenCode）
 
 ```bash
 # 非交互式添加
-cswitch codex add zhipu \
-  --base-url "https://open.bigmodel.cn/api/coding/paas/v4" \
+cswitch opencode add custom \
+  --base-url "https://api.custom.com/v1" \
   --api-key "your-api-key" \
-  --models '["glm-5", "glm-4.7"]' \
-  --provider-name "Z.AI" \
-  --wire-api "chat"
+  --models '["model-a", "model-b"]' \
+  --provider-name "custom" \
+  --small-model "model-b"
 
-# 切换并指定模型
-cswitch codex switch zhipu glm-5
-# 已切换 Codex 配置（模型: glm-5），写入 ~/.codex/auth.json 和 ~/.codex/config.toml
-# 环境变量 OPENAI_API_KEY 已写入 ~/.cswitch/codex.env，新终端自动生效
-# 当前终端请执行: source ~/.cswitch/codex.env
+# 切换配置
+cswitch opencode switch custom
+# 已切换 OpenCode 配置到 custom，写入 ~/.config/opencode/opencode.json
+# 环境变量 OPENCODE_API_KEY 已写入 ~/.cswitch/opencode.env，新终端自动生效
+# 当前终端请执行: source ~/.cswitch/opencode.env
 ```
 
-**关于 `wire_api`**：
-- 设置为 `chat`：使用 `/chat/completions` 端点（大多数第三方厂商支持）
-- 设置为 `responses`：使用 `/responses` 端点（OpenAI 原生 Responses API）
+**OpenCode 配置说明**：
+- 模型格式为 `provider/model`（如 `custom/model-a`）
+- 支持配置 `small_model` 用于轻量级任务
+- API Key 通过环境变量 `{env:OPENCODE_API_KEY}` 引用
+- 配置文件位于 `~/.config/opencode/opencode.json`
 
 ### 场景 3：备份与回滚
 
@@ -185,9 +203,6 @@ cswitch claude switch openai
 cswitch claude rollback
 # 已恢复 ~/.claude/settings.json（来自 ~/.claude/settings.json.bak）
 # 回滚完成，共恢复 1 个文件
-
-# Codex 回滚同时恢复 auth.json、config.toml 和 codex.env
-cswitch codex rollback
 ```
 
 ### 场景 4：查看和管理配置
@@ -197,6 +212,10 @@ cswitch codex rollback
 cswitch claude list
 #   openai
 # * dashscope (current)
+
+# 列出所有 OpenCode 配置
+cswitch opencode list
+# * custom (current)
 
 # 查看当前 Claude 配置详情
 cswitch claude current
@@ -254,16 +273,16 @@ claude
         }
       }
     },
-    "codex": {
-      "current": "zhipu",
-      "current_model": "glm-5",
+    "opencode": {
+      "current": "custom",
+      "current_model": "gpt-4o",
       "models": {
-        "zhipu": {
-          "base_url": "https://open.bigmodel.cn/api/coding/paas/v4",
+        "custom": {
+          "base_url": "https://api.custom.com/v1",
           "api_key": "xxxx",
-          "models": ["glm-5", "glm-4.7"],
-          "provider_name": "Z.AI",
-          "wire_api": "chat"
+          "models": ["gpt-4o", "gpt-4o-mini"],
+          "provider_name": "custom",
+          "small_model": "gpt-4o-mini"
         }
       }
     }
@@ -294,41 +313,31 @@ claude
 
 > Claude Code 支持**热切换**，配置写入后立即生效，无需重启终端。
 
-### Codex 配置
+### OpenCode 配置
 
 **写入位置**：
-- `~/.codex/auth.json`：API Key
-- `~/.codex/config.toml`：base_url、model、model_provider、model_reasoning_effort（合并更新，保留所有其他字段）
-- `~/.cswitch/codex.env`：`OPENAI_API_KEY` 环境变量
+- `~/.config/opencode/opencode.json`：主配置文件
+- `~/.cswitch/opencode.env`：`OPENCODE_API_KEY` 环境变量
 
-**auth.json**：
+**opencode.json**（合并更新）：
 
 ```json
 {
-  "OPENAI_API_KEY": "sk-xxxx"
+  "$schema": "https://opencode.ai/config.json",
+  "model": "custom/model-a",
+  "small_model": "custom/model-b",
+  "provider": {
+    "custom": {
+      "baseURL": "https://api.custom.com/v1",
+      "options": {
+        "apiKey": "{env:OPENCODE_API_KEY}"
+      }
+    }
+  }
 }
 ```
 
-**config.toml**（合并更新）：
-
-```toml
-model = "glm-5"
-model_provider = "Z.AI"
-model_reasoning_effort = "medium"
-
-[model_providers]
-  [model_providers."Z.AI"]
-    name = "Z.AI"
-    base_url = "https://open.bigmodel.cn/api/coding/paas/v4"
-    env_key = "OPENAI_API_KEY"
-    wire_api = "chat"
-
-[projects]
-  [projects."/Users/sunyang/project"]
-    trust_level = "trusted"
-```
-
-> Codex 切换后需**重启 Codex CLI** 或**在新终端**中生效。
+> OpenCode 切换后需**重启 OpenCode CLI** 或**在新终端**中生效。
 
 ## 与 cc-switch 的对比
 
@@ -337,7 +346,7 @@ model_reasoning_effort = "medium"
 | 定位 | 桌面 All-in-One 管理工具 | 轻量 CLI 工具 |
 | 界面 | GUI（Tauri） | 命令行 |
 | 架构 | 数据库存储（SQLite） | JSON 文件 |
-| 多工具 | 5+（Claude、Codex、Gemini、OpenCode、OpenClaw） | 2（Claude、Codex）|
+| 多工具 | 5+（Claude、Codex、Gemini、OpenCode、OpenClaw） | 2（Claude、OpenCode，Codex 暂不可用）|
 | 配置写入 | 完整的 live 配置快照 | 仅更新关键字段 |
 | 自动备份 | ❌ | ✅ |
 | 一键回滚 | ❌ | ✅ |
@@ -359,31 +368,24 @@ cswitch 适合：追求极简、命令行优先、不需要复杂管理功能的
 ### 工具版本支持
 
 - Claude Code：支持 `ANTHROPIC_BASE_URL`、`ANTHROPIC_API_KEY`、`ANTHROPIC_DEFAULT_OPUS_MODEL`、`ANTHROPIC_DEFAULT_HAIKU_MODEL`、`ANTHROPIC_DEFAULT_SONNET_MODEL` 的所有版本
-- Codex：支持使用 `model_provider` + `[model_providers]` 配置方式的版本
+- Codex：⚠️ **暂不可用** - CLI 接口已变更，模型厂商尚未适配
+- OpenCode：支持 `~/.config/opencode/opencode.json` 配置的所有版本
 
 ## 常见问题
 
-### Q: 切换后 Claude Code / Codex 没有生效？
+### Q: 切换后 Claude Code / OpenCode 没有生效？
 
 - **Claude Code**：支持热切换，通常立即生效。如未生效，尝试重启 Claude Code。
-- **Codex**：需要**重启 Codex CLI** 或**在新终端**运行（环境变量通过 `~/.cswitch/codex.env` 注入）。
+- **OpenCode**：需要**重启 OpenCode CLI** 或**在新终端**运行（环境变量通过 `~/.cswitch/opencode.env` 注入）。
 
 ### Q: 回滚后配置还是不对？
 
 每次 `switch` 都会创建递增备份（`.bak` → `.bak.1` → `.bak.2`...）。连续执行 `rollback` 可以逐级恢复：
 
 ```bash
-cswitch codex rollback  # 恢复到 .bak
-ccswitch codex rollback  # 恢复到 .bak.1
+cswitch opencode rollback  # 恢复到 .bak
+cswitch opencode rollback  # 恢复到 .bak.1
 ```
-
-### Q: Codex 报错 `Missing environment variable: OPENAI_API_KEY`？
-
-这是因为 Codex 使用自定义 `model_provider` 时从环境变量读取 API Key。cswitch 已自动处理：
-
-1. 写入 `~/.cswitch/codex.env`
-2. 自动注入 `~/.zshrc` 或 `~/.bashrc`
-3. 提示执行 `source ~/.cswitch/codex.env`
 
 ### Q: 如何恢复到官方默认配置？
 
@@ -412,9 +414,9 @@ cswitch claude switch dashscope
 
 敏感配置文件默认 `0600`（仅所有者可读写）：
 - `~/.cswitch/config.json`
-- `~/.cswitch/codex.env`
+- `~/.cswitch/opencode.env`
 - `~/.claude/settings.json`
-- `~/.codex/auth.json`
+- `~/.config/opencode/opencode.json`
 
 ### Q: 如何查看工具的帮助信息？
 
